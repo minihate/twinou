@@ -122,7 +122,7 @@ peers(function(a, b) {
     }
 });
 
-var spring_length = 300;
+var spring_length = 150 * density;
 var distanceP = 1;
 var repulsives = canvas.width > canvas.height ? [new Vector(canvas.width / 2, 0), new Vector(canvas.width / 2, canvas.height)] : [new Vector(0, canvas.height / 2), new Vector(canvas.width, canvas.height / 2)];
 function integrate(delta) {
@@ -191,7 +191,7 @@ function draw() {
         }
         context.shadowBlur = shadow;
         context.beginPath();
-        context.ellipse(bubble.p.x, bubble.p.y, measure.width, Math.max(size + 5, measure.width / 2), 0, 0, 2 * Math.PI, false);
+        context.ellipse(bubble.p.x, bubble.p.y, measure.width / 2 + 20, size + 5, 0, 0, 2 * Math.PI, false);
         context.stroke();
         context.fill();
         context.fillStyle = bubble.color;

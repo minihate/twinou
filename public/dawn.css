@@ -1,0 +1,104 @@
+body {
+    font-size: 12px;
+    font-family: Verdana;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center center;
+}
+
+body, h1, h2 {
+    margin: 0;
+}
+
+h1, h2 {
+    display: inline;
+}
+
+header {
+    text-align: center;
+    vertical-align: middle;
+    border-bottom: 1px solid gray;
+    z-index: 1;
+}
+
+header, h1, h2 {
+    font-size: 14px;
+}
+
+h2 {
+    font-weight: normal;
+}
+
+#blog, #title {
+    display: inline-block;
+    padding: 10px;
+}
+
+#blog {
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 2;
+}
+
+#title {
+    max-width: 60%;
+}
+
+#menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 300px;
+    height: 400px;
+    box-shadow: 0 0 15px black;
+    background-color: white;
+    z-index: 1;
+    display: none;
+}
+
+main {
+    padding: 20px;
+    word-wrap: break-word;
+    background-color: white;
+    color: hsl(0, 0%, 20%);
+}
+
+.scrolled {
+    background-color: white;
+    color: black !important;
+    border-bottom: none !important;
+    box-shadow: 0 0 5px black;
+}
+
+.scrolled #blog {
+    text-shadow: none !important;
+}
+
+.background header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+.background #blog {
+    text-shadow: 0 0 2px black;
+}
+
+.background main {
+    box-shadow: 0 0 15px black;
+}
+
+.background #menu {
+    position: fixed;
+}
+
+.menu-open #menu {
+    display: block !important;
+}
+
+.menu-open #blog {
+    color: black !important;
+    text-shadow: none !important;
+}

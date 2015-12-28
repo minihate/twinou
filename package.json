@@ -1,0 +1,12 @@
+{
+    "dependencies": {
+        "mime": "latest",
+        "handlebars": "latest",
+        "node-watch": "latest",
+        "get-image-colors": "latest",
+        "ws": "latest"
+    },
+    "scripts": {
+        "start": "node --harmony index.js"
+    }
+}

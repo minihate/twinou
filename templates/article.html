@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+        <title>{{title}}</title>
+        <script>window.background = {{#if background}} '{{background}}'{{else}}null{{/if}};</script>
+        <script src="articles.js" async defer></script>
+        <link rel="stylesheet" href="dawn.css"/>
+    </head>
+    <body>
+        <header><div id="blog">&#9776; <h1>{{name}}</h1></div><h2 id="title">{{{title}}}</h2><nav id="menu"></nav></header>
+        <main>{{{content}}}</main>
+    </body>
+</html>

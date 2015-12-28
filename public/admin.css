@@ -1,0 +1,126 @@
+html, body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    display: flex;
+    font-family: Verdana;
+}
+
+nav {
+    border-right: 1px solid hsl(0, 0%, 80%);
+    height: 100%;
+    flex: 2;
+}
+
+main {
+    flex: 8;
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+nav > div {
+    margin: 0;
+    padding: 10px;
+}
+
+#informations, #newtag {
+    color: white;
+    cursor: pointer;
+}
+
+#informations {
+    color: hsl(202, 100%, 50%);
+}
+
+#informations:hover {
+    color: hsl(202, 100%, 30%);
+    text-decoration: underline;
+}
+
+#newtag {
+    color: hsl(320, 100%, 50%);
+}
+
+#newtag:hover {
+    color: hsl(320, 100%, 30%);
+    text-decoration: underline;
+}
+
+#tags-tree {
+    color: gray;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    padding-left: 20px;
+}
+
+li {
+    padding: 0;
+}
+
+.tag {
+    cursor: pointer;
+}
+
+.tag:hover {
+    color: hsl(0, 0%, 30%);
+    text-decoration: underline;
+}
+
+.field {
+    padding: 20px;
+    border-bottom: 1px solid hsl(0, 0%, 80%);
+}
+
+.field strong {
+    color: gray;
+    display: inline-block;
+    width: 33%;
+}
+
+.field input[type=text] {
+    border: 1px solid gray;
+    font-family: Verdana;
+    width: calc(66% - 20px);
+    outline: 0;
+    padding: 5px 10px;
+}
+
+.field input[type=text]:focus {
+    border: 1px solid hsl(280, 100%, 50%);
+}
+
+.button {
+    margin-left: 30px;
+    box-shadow: 0 0 3px hsla(0, 0%, 0%, 0.7);
+    text-shadow: 0 0 1px hsla(0, 0%, 50%, 0.7);
+    text-align: center;
+    color: white !important;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.items {
+    margin-left: 40px;
+    padding: 10px;
+    list-style-type: disc;
+}
+
+.items li {
+    color: gray;
+    font-size: 20px !important;
+    cursor: pointer;
+}
+
+.items li:hover {
+    text-decoration: underline;
+}
+
+.mce-tinymce {
+    margin-top: 20px !important;
+}

@@ -1,0 +1,4 @@
+
+> @ start /home/twinou
+> node --harmony index.js "1013"
+

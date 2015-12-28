@@ -70,7 +70,11 @@ ss.on('connection', socket => {
     });
 });
 
-server.module(new RegExp('^/$'), 'mindmap', getMetas);
+server.module(new RegExp('^/$'), 'mindmap', () => {
+    var m = getMetas();
+    m.json = JSON.stringify(m.tags);
+    return m;
+});
 server.module(new RegExp('^/admin$'), 'admin', getMetas);
 server.module(new RegExp('^/.{1,}$'), 'article', uri => {
     var article = articles.getItem(decodeURIComponent(uri.pathname.slice(1)));

@@ -7,8 +7,8 @@
 
 var thin = false;
 var reverse = false;
-var density = 1;
-var shadow = 2 * (thin ? 3 : 5) * density;
+var density = 2;
+var shadow = (thin ? 3 : 5) * density;
 var size = 16 * density;
 var foreground = 'black';
 document.body.style.margin = '0';
@@ -171,7 +171,7 @@ function integrate(delta) {
                     to.a.add(s2.normalize().scale(Math.pow(s1.norm(), 1)).scale(from.mass));
                 }
             } else /*if (!to.isChildOf(from))*/ if (to.mass === from.mass) { // HACK
-                to.a.substract(ab.normalize().scale(Math.pow(ab.norm(), -2)).scale(from.mass / to.mass).scale(10));
+                to.a.substract(ab.normalize().scale(Math.pow(ab.norm(), -2)).scale(from.mass).scale(10));
             }
         }
     });

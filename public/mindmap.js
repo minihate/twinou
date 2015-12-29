@@ -3,9 +3,12 @@
 // Tags in colored caps, and articles in lower case ?
 // TODO compute mass from tree => involve shadows
 // TODO fix shudder without hacks
+// TODO bubbles repulse more depending on width or height
 
+var thin = false;
+var reverse = false;
 var density = 1;
-var shadow = 5 * density;
+var shadow = 2 * (thin ? 3 : 5) * density;
 var size = 16 * density;
 var foreground = 'black';
 document.body.style.margin = '0';
@@ -17,15 +20,14 @@ canvas.style.width = '100%';
 canvas.style.height = '100%';
 document.body.style.height = '100%';
 var context = canvas.getContext('2d');
-context.font = 'bold ' + size + 'px "Open Sans Condensed"';
+context.font = (!thin ? 'bold ' : '') + size + 'px "Open Sans Condensed"';
 context.strokeStyle = foreground;
 context.shadowColor = 'gray';
-context.lineWidth = 3 * density;
+context.lineWidth = (thin ? 1 : 3) * density;
 context.textAlign = 'center';
 context.textBaseline = 'middle';
 context.imageSmoothingEnabled = true;
 document.body.appendChild(canvas);
-var reverse = false;
 
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
@@ -80,14 +82,37 @@ function Bubble(name, bonds, p) {
     this.p = p || Vector.random().multiply(new Vector(canvas.width, canvas.height));
     this.v = new Vector(0, 0);
     this.a = new Vector(0, 0);
-    this.color = this.bonds.length > 0 ? 'hsl(' + Math.floor(360 / window.tags.childs.length * rze % 360) + ', 100%, 50%)' : 'hsl(0, 0%, 0%)';
+    this.mass = 1;
+    this.childs = [];
+    this._color = Math.floor(360 / window.tags.childs.length * rze % 360);
 }
+
+var minMass = 100;
+var maxMass = 0;
+Bubble.prototype.computeMass = function() {
+    this.mass = this.childs.map(function(child) {return child.computeMass();}).reduce(function(a, b) {return a + b;}, 1);
+    if (this.mass < minMass) minMass = this.mass;
+    if (this.mass > maxMass) maxMass = this.mass;
+    return this.mass
+};
+
+Bubble.prototype.massP = function() {
+    return maxMass !== minMass ? (this.mass - minMass) / (maxMass - minMass) : 1;
+};
+
+Bubble.prototype.computeColor = function() {
+    this.color = this.bonds.length > 0 ? 'hsl(' + this._color + ', ' +  Math.floor((1 - this.massP()) * 100)+ '%, 50%)' : 'hsl(0, 0%, 0%)';
+};
 
 Bubble.prototype.isBondedTo = function(other) {
     for (var a in this.bonds) {
         if (this.bonds[a].toLowerCase() === other.name.toLowerCase()) return true;
     }
     return false;
+};
+
+Bubble.prototype.isChildOf = function(other) {
+    return other.childs.indexOf(this) !== -1 ? true : this._bonds.length > 0 ? this._bonds[0].isChildOf(other) : false;//other.childs.indexOf(this) !== -1;
 };
 
 Bubble.prototype.integrate = function(delta) {
@@ -120,37 +145,42 @@ function peers(f) {
 
 peers(function(a, b) {
     if (b.isBondedTo(a)) {
+        a.childs.push(b);
         b._bonds.push(a);
         if (a.bonds.length > 0) b.color = a.color;
     }
 });
 
+bubbles[0].computeMass();
+bubbles.forEach(function(bubble) {bubble.computeColor();});
+
 var spring_length = 150 * density;
-var distanceP = 1;
 var repulsives = canvas.width > canvas.height ? [new Vector(canvas.width / 2, 0), new Vector(canvas.width / 2, canvas.height)] : [new Vector(0, canvas.height / 2), new Vector(canvas.width, canvas.height / 2)];
 function integrate(delta) {
     peers(function(from, to) {
         if (to.bonds.length > 0) {
             var ab = from.p.clone().substract(to.p); // to -> from
             if (to.isBondedTo(from)) {
-                var spring = ab.clone().scale(-1).normalize().scale(spring_length).add(from.p);
+                var s1 = ab.clone().scale(-1).normalize().scale(spring_length);
+                var spring = s1.clone().add(from.p);
                 var s2 = spring.clone().substract(to.p);
-                if (s2.norm() > 10) {
-                    to.a.add(s2.normalize().scale(s2.norm()).scale(spring_length * 10));
-                } else {
+                if (s2.norm() <= 10 || to.tige) {
+                    to.tige = true;
                     to.p = spring.clone();
+                } else {
+                    to.a.add(s2.normalize().scale(Math.pow(s1.norm(), 1)).scale(from.mass));
                 }
-            } else {
-                to.a.add(ab.normalize().scale(-1 / Math.pow(ab.norm(), distanceP)).scale(spring_length));
+            } else /*if (!to.isChildOf(from))*/ if (to.mass === from.mass) { // HACK
+                to.a.substract(ab.normalize().scale(Math.pow(ab.norm(), -2)).scale(from.mass / to.mass).scale(10));
             }
         }
     });
     bubbles.forEach(function(bubble) {
         repulsives.forEach(function(repulsif) {
             var ab = bubble.p.clone().substract(repulsif);
-            bubble.a.add(ab.normalize().scale(1 / Math.pow(ab.norm(), distanceP)).scale(spring_length));
+            bubble.a.add(ab.normalize().scale(Math.pow(ab.norm(), -2)));
         });
-        bubble.v.scale(0.9);
+        bubble.v.scale(0.99);
         bubble.integrate(delta);
     });
 }
@@ -159,8 +189,7 @@ var accumulator = 0;
 var fixedDelta = 1/60;
 var speed = 10;
 function pace(delta) {
-    delta *= speed;
-    for (accumulator += delta; accumulator > fixedDelta; accumulator -= fixedDelta) {
+    for (accumulator += delta * speed; accumulator > fixedDelta; accumulator -= fixedDelta) {
         integrate(fixedDelta);
     }
 }

@@ -1,16 +1,17 @@
 'use strict';
 
 // Tags in colored caps, and articles in lower case ?
-// TODO compute mass from tree => involve shadows
 // TODO fix shudder without hacks
 // TODO bubbles repulse more depending on width or height
+// TODO dont place randomly bubbles
+// TODO real joint physics
 
-var thin = false;
+var zoom = 1;
 var reverse = false;
 var density = 2;
-var shadow = (thin ? 3 : 5) * density;
-var size = 16 * density;
+var size = zoom * 16 * zoom * density;
 var foreground = 'black';
+var shadow;
 document.body.style.margin = '0';
 document.body.style.overflow = 'hidden';
 var canvas = document.createElement('canvas');
@@ -20,10 +21,13 @@ canvas.style.width = '100%';
 canvas.style.height = '100%';
 document.body.style.height = '100%';
 var context = canvas.getContext('2d');
-context.font = (!thin ? 'bold ' : '') + size + 'px "Open Sans Condensed"';
+function setThin(thin) {
+    shadow = (thin ? 3 : 5) * zoom * density;
+    context.font = (!thin ? 'bold ' : '') + size + 'px "Open Sans Condensed"';
+context.lineWidth = (thin ? 1 : 3) * density * zoom;
+}
 context.strokeStyle = foreground;
 context.shadowColor = 'gray';
-context.lineWidth = (thin ? 1 : 3) * density;
 context.textAlign = 'center';
 context.textBaseline = 'middle';
 context.imageSmoothingEnabled = true;
@@ -121,6 +125,10 @@ Bubble.prototype.integrate = function(delta) {
     this.a = new Vector(0, 0);
 };
 
+Bubble.prototype.depth = function() {
+    return 1 + this.childs.length > 0 ? Math.max.apply(null, this.childs.map(function(child) {return child.depth();})) : 0;
+}
+
 
 var bubbles = [];
 
@@ -154,8 +162,9 @@ peers(function(a, b) {
 bubbles[0].computeMass();
 bubbles.forEach(function(bubble) {bubble.computeColor();});
 
-var spring_length = 150 * density;
+var spring_length = zoom * 150 * density;//, 0 * Math.max(canvas.width, canvas.height) / bubbles[0].depth());
 var repulsives = canvas.width > canvas.height ? [new Vector(canvas.width / 2, 0), new Vector(canvas.width / 2, canvas.height)] : [new Vector(0, canvas.height / 2), new Vector(canvas.width, canvas.height / 2)];
+var use_tige = true;
 function integrate(delta) {
     peers(function(from, to) {
         if (to.bonds.length > 0) {
@@ -164,7 +173,7 @@ function integrate(delta) {
                 var s1 = ab.clone().scale(-1).normalize().scale(spring_length);
                 var spring = s1.clone().add(from.p);
                 var s2 = spring.clone().substract(to.p);
-                if (s2.norm() <= 10 || to.tige) {
+                if (use_tige && (s2.norm() <= 10 || to.tige)) {
                     to.tige = true;
                     to.p = spring.clone();
                 } else {
@@ -187,7 +196,7 @@ function integrate(delta) {
 
 var accumulator = 0;
 var fixedDelta = 1/60;
-var speed = 10;
+var speed = 30;
 function pace(delta) {
     for (accumulator += delta * speed; accumulator > fixedDelta; accumulator -= fixedDelta) {
         integrate(fixedDelta);
@@ -218,6 +227,7 @@ function draw() {
         });
     });
     bubbles.forEach(function(bubble) {
+        setThin(bubble.bonds.length> 0);
         context.shadowBlur = 0;
         var measure = context.measureText(bubble.name);
         context.fillStyle = !reverse ? 'white' : bubble.color;
@@ -232,13 +242,17 @@ function draw() {
 }
 
 var last = null;
+var aaaa = !use_tige;
 function step() {
     var now = Date.now();
     if (last && (now - last) < 1000 / 10) {
         pace((now - last) / 1000);
     }
     last = now;
-    draw();
+    if (aaaa || bubbles.every(function(bubble) {return bubble.bonds.length === 0 || !!bubble.tige;})) {
+        draw();
+        aaaa = true;
+    }
     window.requestAnimationFrame(step);
 }
 step();

@@ -5,7 +5,7 @@
 // TODO fix shudder without hacks
 
 var density = 1;
-var shadow = 3 * density;
+var shadow = 5 * density;
 var size = 16 * density;
 var foreground = 'black';
 document.body.style.margin = '0';
@@ -135,7 +135,6 @@ function integrate(delta) {
             if (to.isBondedTo(from)) {
                 var spring = ab.clone().scale(-1).normalize().scale(spring_length).add(from.p);
                 var s2 = spring.clone().substract(to.p);
-                //to.s = spring;
                 if (s2.norm() > 10) {
                     to.a.add(s2.normalize().scale(s2.norm()).scale(spring_length * 10));
                 } else {
@@ -169,6 +168,13 @@ function pace(delta) {
 function draw() {
     context.clearRect(0, 0, canvas.width, canvas.height);
     bubbles.forEach(function(bubble) {
+        var measure = context.measureText(bubble.name);
+        context.shadowBlur = shadow;
+        context.beginPath();
+        context.ellipse(bubble.p.x, bubble.p.y, measure.width / 2 + 20 * density, size + 5 * density, 0, 0, 2 * Math.PI, false);
+        context.stroke();
+    });
+    bubbles.forEach(function(bubble) {
         context.fillStyle = 'white';
         context.shadowBlur = shadow;
         bubble._bonds.forEach(function(other) {
@@ -183,22 +189,15 @@ function draw() {
         });
     });
     bubbles.forEach(function(bubble) {
+        context.shadowBlur = 0;
         var measure = context.measureText(bubble.name);
         context.fillStyle = !reverse ? 'white' : bubble.color;
         context.strokeStyle = bubble.color;
-        if (bubble.s) {
-            context.beginPath();
-            context.moveTo(bubble.p.x, bubble.p.y);
-            context.lineTo(bubble.s.x, bubble.s.y);
-            context.stroke();
-        }
-        context.shadowBlur = shadow;
         context.beginPath();
         context.ellipse(bubble.p.x, bubble.p.y, measure.width / 2 + 20 * density, size + 5 * density, 0, 0, 2 * Math.PI, false);
         context.stroke();
         context.fill();
         context.fillStyle = !reverse ? bubble.color : 'white';
-        context.shadowBlur = 0;
         context.fillText(bubble.name, bubble.p.x, bubble.p.y);
     });
 }

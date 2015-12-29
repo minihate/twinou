@@ -1,9 +1,11 @@
 'use strict';
 
-// Colors for tags ?
-// Tags in caps, and articles in lower case ?
-var density = 2;
-var shadow = 4 * density;
+// Tags in colored caps, and articles in lower case ?
+// TODO compute mass from tree => involve shadows
+// TODO fix shudder without hacks
+
+var density = 1;
+var shadow = 3 * density;
 var size = 16 * density;
 var foreground = 'black';
 document.body.style.margin = '0';
@@ -17,12 +19,13 @@ document.body.style.height = '100%';
 var context = canvas.getContext('2d');
 context.font = 'bold ' + size + 'px "Open Sans Condensed"';
 context.strokeStyle = foreground;
-//context.shadowColor = 'gray';
+context.shadowColor = 'gray';
 context.lineWidth = 3 * density;
 context.textAlign = 'center';
 context.textBaseline = 'middle';
 context.imageSmoothingEnabled = true;
 document.body.appendChild(canvas);
+var reverse = false;
 
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
@@ -148,7 +151,7 @@ function integrate(delta) {
             var ab = bubble.p.clone().substract(repulsif);
             bubble.a.add(ab.normalize().scale(1 / Math.pow(ab.norm(), distanceP)).scale(spring_length));
         });
-        bubble.v.scale(9/10);
+        bubble.v.scale(0.9);
         bubble.integrate(delta);
     });
 }
@@ -181,7 +184,7 @@ function draw() {
     });
     bubbles.forEach(function(bubble) {
         var measure = context.measureText(bubble.name);
-        context.fillStyle = 'white';
+        context.fillStyle = !reverse ? 'white' : bubble.color;
         context.strokeStyle = bubble.color;
         if (bubble.s) {
             context.beginPath();
@@ -191,10 +194,10 @@ function draw() {
         }
         context.shadowBlur = shadow;
         context.beginPath();
-        context.ellipse(bubble.p.x, bubble.p.y, measure.width / 2 + 20, size + 5, 0, 0, 2 * Math.PI, false);
+        context.ellipse(bubble.p.x, bubble.p.y, measure.width / 2 + 20 * density, size + 5 * density, 0, 0, 2 * Math.PI, false);
         context.stroke();
         context.fill();
-        context.fillStyle = bubble.color;
+        context.fillStyle = !reverse ? bubble.color : 'white';
         context.shadowBlur = 0;
         context.fillText(bubble.name, bubble.p.x, bubble.p.y);
     });
